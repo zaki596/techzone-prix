@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -127,6 +128,7 @@ tr:hover td{background:var(--bg2)}
 <body>
 
 <!-- LOGIN -->
+
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo">📦</div>
@@ -144,6 +146,7 @@ tr:hover td{background:var(--bg2)}
 </div>
 
 <!-- MAIN APP -->
+
 <div id="screen-app" class="screen">
   <div class="topbar">
     <div class="topbar-brand">📦 Techzone — مساعد الأسعار</div>
@@ -160,125 +163,131 @@ tr:hover td{background:var(--bg2)}
   </div>
   <div class="main">
 
-    <!-- SUPPLIERS -->
-    <div id="tab-suppliers" class="tab-panel active">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">الموردون</div><div class="stat-val" id="cnt-s">0</div></div>
-        <div class="stat-card"><div class="stat-label">المنتجات</div><div class="stat-val" id="cnt-p">0</div></div>
-        <div class="stat-card"><div class="stat-label">أقل سعر</div><div class="stat-val" id="min-p">—</div><div class="stat-sub">دج</div></div>
-        <div class="stat-card"><div class="stat-label">أعلى سعر</div><div class="stat-val" id="max-p">—</div><div class="stat-sub">دج</div></div>
+```
+<!-- SUPPLIERS -->
+<div id="tab-suppliers" class="tab-panel active">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">الموردون</div><div class="stat-val" id="cnt-s">0</div></div>
+    <div class="stat-card"><div class="stat-label">المنتجات</div><div class="stat-val" id="cnt-p">0</div></div>
+    <div class="stat-card"><div class="stat-label">أقل سعر</div><div class="stat-val" id="min-p">—</div><div class="stat-sub">دج</div></div>
+    <div class="stat-card"><div class="stat-label">أعلى سعر</div><div class="stat-val" id="max-p">—</div><div class="stat-sub">دج</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">✏️ إدخال يدوي</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-purple btn-sm" onclick="openImport('suppliers')">📂 رفع PDF / Excel</button>
+        <span class="saving" id="save-s">⏳</span>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">✏️ إدخال يدوي</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-purple btn-sm" onclick="openImport('suppliers')">📂 رفع PDF / Excel</button>
-            <span class="saving" id="save-s">⏳</span>
-          </div>
-        </div>
-        <div class="form-grid-2">
-          <div><span class="lbl">اسم المورد *</span><input id="s-supplier" placeholder="مثال: مورد الجزائر" /></div>
-          <div><span class="lbl">اسم المنتج *</span><input id="s-product" placeholder="مثال: دفتر A4 سلكي" /></div>
-        </div>
-        <div class="form-grid-3">
-          <div><span class="lbl">المرجع / الوصف</span><input id="s-ref" placeholder="مثال: علبة 12، مخطط" /></div>
-          <div><span class="lbl">السعر (دج) *</span><input id="s-price" type="number" min="0" placeholder="0.00" /></div>
-          <div><span class="lbl">الوحدة</span><select id="s-unit"><option>قطعة</option><option>علبة</option><option>رزمة</option><option>كرتون</option><option>دوزين</option><option>كغ</option><option>لتر</option><option>طن</option></select></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addProduct()">➕ إضافة</button></div>
-      </div>
-      <div class="search-box"><span class="search-icon">🔍</span><input id="search-s" style="padding-right:34px" placeholder="بحث..." oninput="renderS()" /></div>
-      <div id="suppliers-list"><div class="empty">⏳ جارٍ التحميل...</div></div>
     </div>
-
-    <!-- CLIENTS -->
-    <div id="tab-clients" class="tab-panel">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">الزبائن</div><div class="stat-val" id="cnt-cl">0</div></div>
-        <div class="stat-card"><div class="stat-label">عروض الأسعار</div><div class="stat-val" id="cnt-of">0</div></div>
-        <div class="stat-card"><div class="stat-label">آخر إضافة</div><div class="stat-val" style="font-size:12px;padding-top:5px" id="last-of">—</div></div>
-        <div class="stat-card"><div class="stat-label">أعلى عرض</div><div class="stat-val" id="max-of">—</div><div class="stat-sub">دج</div></div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">✏️ إدخال يدوي</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-purple btn-sm" onclick="openImport('clients')">📂 رفع PDF / Excel</button>
-            <span class="saving" id="save-c">⏳</span>
-          </div>
-        </div>
-        <div class="form-grid-2">
-          <div><span class="lbl">اسم الزبون *</span><input id="c-client" placeholder="مثال: مؤسسة النجمة" /></div>
-          <div><span class="lbl">نوع الزبون</span><select id="c-type"><option>موزع</option><option>إدارة</option><option>شركة</option><option>متجر</option><option>مدرسة</option></select></div>
-        </div>
-        <div class="form-grid-3">
-          <div><span class="lbl">المنتج *</span><input id="c-product" placeholder="مثال: أقلام بيك" /></div>
-          <div><span class="lbl">السعر (دج) *</span><input id="c-price" type="number" min="0" placeholder="0.00" /></div>
-          <div><span class="lbl">الوحدة</span><select id="c-unit"><option>قطعة</option><option>علبة</option><option>رزمة</option><option>كرتون</option><option>دوزين</option></select></div>
-        </div>
-        <div class="form-grid-2">
-          <div><span class="lbl">الكمية</span><input id="c-qty" type="number" min="0" placeholder="50" /></div>
-          <div><span class="lbl">ملاحظة</span><input id="c-note" placeholder="سعر جملة، خاص..." /></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addClient()">➕ إضافة</button></div>
-      </div>
-      <div class="search-box"><span class="search-icon">🔍</span><input id="search-c" style="padding-right:34px" placeholder="بحث..." oninput="renderC()" /></div>
-      <div id="clients-list"><div class="empty">⏳ جارٍ التحميل...</div></div>
+    <div class="form-grid-2">
+      <div><span class="lbl">اسم المورد *</span><input id="s-supplier" placeholder="مثال: مورد الجزائر" /></div>
+      <div><span class="lbl">اسم المنتج *</span><input id="s-product" placeholder="مثال: دفتر A4 سلكي" /></div>
     </div>
+    <div class="form-grid-3">
+      <div><span class="lbl">المرجع / الوصف</span><input id="s-ref" placeholder="مثال: علبة 12، مخطط" /></div>
+      <div><span class="lbl">السعر (دج) *</span><input id="s-price" type="number" min="0" placeholder="0.00" /></div>
+      <div><span class="lbl">الوحدة</span><select id="s-unit"><option>قطعة</option><option>علبة</option><option>رزمة</option><option>كرتون</option><option>دوزين</option><option>كغ</option><option>لتر</option><option>طن</option></select></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addProduct()">➕ إضافة</button></div>
+  </div>
+  <div class="search-box"><span class="search-icon">🔍</span><input id="search-s" style="padding-right:34px" placeholder="بحث..." oninput="renderS()" /></div>
+  <div id="suppliers-list"><div class="empty">⏳ جارٍ التحميل...</div></div>
+</div>
 
-    <!-- AI -->
-    <div id="tab-ai" class="tab-panel">
-      <div id="no-key-box" class="info-box" style="display:none">⚠️ أضف مفتاح Anthropic في <strong>الإعدادات</strong> لتفعيل المساعد الذكي.</div>
-      <div class="chat-wrap">
-        <div class="chat-msgs" id="chat-msgs">
-          <div class="msg ai">مرحباً! أنا مساعد Techzone للأسعار 📦
+<!-- CLIENTS -->
+<div id="tab-clients" class="tab-panel">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">الزبائن</div><div class="stat-val" id="cnt-cl">0</div></div>
+    <div class="stat-card"><div class="stat-label">عروض الأسعار</div><div class="stat-val" id="cnt-of">0</div></div>
+    <div class="stat-card"><div class="stat-label">آخر إضافة</div><div class="stat-val" style="font-size:12px;padding-top:5px" id="last-of">—</div></div>
+    <div class="stat-card"><div class="stat-label">أعلى عرض</div><div class="stat-val" id="max-of">—</div><div class="stat-sub">دج</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">✏️ إدخال يدوي</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-purple btn-sm" onclick="openImport('clients')">📂 رفع PDF / Excel</button>
+        <span class="saving" id="save-c">⏳</span>
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div><span class="lbl">اسم الزبون *</span><input id="c-client" placeholder="مثال: مؤسسة النجمة" /></div>
+      <div><span class="lbl">نوع الزبون</span><select id="c-type"><option>موزع</option><option>إدارة</option><option>شركة</option><option>متجر</option><option>مدرسة</option></select></div>
+    </div>
+    <div class="form-grid-3">
+      <div><span class="lbl">المنتج *</span><input id="c-product" placeholder="مثال: أقلام بيك" /></div>
+      <div><span class="lbl">السعر (دج) *</span><input id="c-price" type="number" min="0" placeholder="0.00" /></div>
+      <div><span class="lbl">الوحدة</span><select id="c-unit"><option>قطعة</option><option>علبة</option><option>رزمة</option><option>كرتون</option><option>دوزين</option></select></div>
+    </div>
+    <div class="form-grid-2">
+      <div><span class="lbl">الكمية</span><input id="c-qty" type="number" min="0" placeholder="50" /></div>
+      <div><span class="lbl">ملاحظة</span><input id="c-note" placeholder="سعر جملة، خاص..." /></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addClient()">➕ إضافة</button></div>
+  </div>
+  <div class="search-box"><span class="search-icon">🔍</span><input id="search-c" style="padding-right:34px" placeholder="بحث..." oninput="renderC()" /></div>
+  <div id="clients-list"><div class="empty">⏳ جارٍ التحميل...</div></div>
+</div>
+
+<!-- AI -->
+<div id="tab-ai" class="tab-panel">
+  <div id="no-key-box" class="info-box" style="display:none">⚠️ أضف مفتاح Anthropic في <strong>الإعدادات</strong> لتفعيل المساعد الذكي.</div>
+  <div class="chat-wrap">
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="msg ai">مرحباً! أنا مساعد Techzone للأسعار 📦
+```
+
 أطلع على جميع بياناتكم وأجيب بدقة على أسئلتكم حول الأسعار، الموردين، الزبائن، وهوامش الربح.</div>
-        </div>
-        <div class="chat-foot">
-          <div class="chat-row">
-            <textarea id="chat-input" rows="2" placeholder="اكتب سؤالك... (Ctrl+Enter للإرسال)" onkeydown="chatKey(event)"></textarea>
-            <button class="btn btn-primary" onclick="sendAI()" style="align-self:flex-end">إرسال ↗</button>
-          </div>
-          <div class="quick-btns">
-            <button class="quick-btn" onclick="quickQ('اعرض جميع أسعار الموردين')">كل أسعار الموردين</button>
-            <button class="quick-btn" onclick="quickQ('قارن الموردين وأخبرني الأرخص لكل منتج')">مقارنة الموردين</button>
-            <button class="quick-btn" onclick="quickQ('احسب هامش الربح لكل منتج')">هوامش الربح</button>
-            <button class="quick-btn" onclick="quickQ('ما آخر الأسعار المعروضة على الزبائن؟')">آخر العروض</button>
-          </div>
-        </div>
-      </div>
-    </div>
+</div>
+<div class="chat-foot">
+<div class="chat-row">
+<textarea id="chat-input" rows="2" placeholder="اكتب سؤالك... (Ctrl+Enter للإرسال)" onkeydown="chatKey(event)"></textarea>
+<button class="btn btn-primary" onclick="sendAI()" style="align-self:flex-end">إرسال ↗</button>
+</div>
+<div class="quick-btns">
+<button class="quick-btn" onclick="quickQ('اعرض جميع أسعار الموردين')">كل أسعار الموردين</button>
+<button class="quick-btn" onclick="quickQ('قارن الموردين وأخبرني الأرخص لكل منتج')">مقارنة الموردين</button>
+<button class="quick-btn" onclick="quickQ('احسب هامش الربح لكل منتج')">هوامش الربح</button>
+<button class="quick-btn" onclick="quickQ('ما آخر الأسعار المعروضة على الزبائن؟')">آخر العروض</button>
+</div>
+</div>
+</div>
+</div>
 
-    <!-- SETTINGS -->
-    <div id="tab-settings" class="tab-panel">
-      <div class="card">
-        <div class="card-title" style="margin-bottom:1rem">🔑 مفتاح الذكاء الاصطناعي</div>
-        <div class="form-group"><span class="lbl">Anthropic API Key</span><input id="set-key" type="password" placeholder="sk-ant-..." /></div>
-        <button class="btn btn-primary btn-sm" onclick="saveKey()">💾 حفظ المفتاح</button>
-      </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:1rem">📤 تصدير البيانات</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" onclick="exportCSV('suppliers')">📊 تصدير الموردين CSV</button>
-          <button class="btn" onclick="exportCSV('clients')">🤝 تصدير الزبائن CSV</button>
-          <button class="btn" onclick="window.print()">🖨️ طباعة</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:1rem">ℹ️ معلومات</div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.9">
-          <strong>Techzone — مساعد الأسعار</strong><br>
-          بيانات مشتركة بين جميع الموظفين عبر Firebase<br>
-          يدعم: إدخال يدوي + رفع PDF وExcel<br>
-          رابط التطبيق: <span id="app-url" style="color:var(--blue-text)"></span>
-        </div>
-      </div>
+```
+<!-- SETTINGS -->
+<div id="tab-settings" class="tab-panel">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:1rem">🔑 مفتاح الذكاء الاصطناعي</div>
+    <div class="form-group"><span class="lbl">Anthropic API Key</span><input id="set-key" type="password" placeholder="sk-ant-..." /></div>
+    <button class="btn btn-primary btn-sm" onclick="saveKey()">💾 حفظ المفتاح</button>
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:1rem">📤 تصدير البيانات</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="exportCSV('suppliers')">📊 تصدير الموردين CSV</button>
+      <button class="btn" onclick="exportCSV('clients')">🤝 تصدير الزبائن CSV</button>
+      <button class="btn" onclick="window.print()">🖨️ طباعة</button>
     </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:1rem">ℹ️ معلومات</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9">
+      <strong>Techzone — مساعد الأسعار</strong><br>
+      بيانات مشتركة بين جميع الموظفين عبر Firebase<br>
+      يدعم: إدخال يدوي + رفع PDF وExcel<br>
+      رابط التطبيق: <span id="app-url" style="color:var(--blue-text)"></span>
+    </div>
+  </div>
+</div>
+```
 
   </div>
 </div>
 
 <!-- IMPORT MODAL -->
+
 <div id="import-modal" style="display:none">
   <div class="overlay">
     <div class="modal">
@@ -367,14 +376,20 @@ window.onload = function(){
 // ===== LOGIN =====
 function pick(n,btn){ document.querySelectorAll('.avatar-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); document.getElementById('custom-name').value=n; }
 function doLogin(){
-  const n=document.getElementById('custom-name').value.trim();
-  if(!n){toast('اكتب اسمك');return;}
-  currentUser=n; localStorage.setItem('tz_user',n);
-  const k=document.getElementById('login-ant-key').value.trim();
-  if(k){ localStorage.setItem('tz_key',k); document.getElementById('set-key').value=k; }
-  document.getElementById('topbar-user').textContent='👤 '+n;
+  const nameEl = document.getElementById('custom-name');
+  const n = nameEl ? nameEl.value.trim() : '';
+  if(!n){ alert('اكتب اسمك أولاً'); return; }
+  currentUser = n;
+  localStorage.setItem('tz_user', n);
+  const keyEl = document.getElementById('login-ant-key');
+  const k = keyEl ? keyEl.value.trim() : '';
+  if(k){ localStorage.setItem('tz_key', k); const sk=document.getElementById('set-key'); if(sk)sk.value=k; }
+  const tu = document.getElementById('topbar-user');
+  if(tu) tu.textContent = '👤 ' + n;
   checkKey();
-  show('screen-app');
+  // Hide login, show app
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').style.display = 'flex';
 }
 function doLogout(){ if(confirm('تغيير المستخدم؟')) show('screen-login'); }
 
@@ -636,11 +651,12 @@ function setP(p,t,s){document.getElementById('prog').style.width=p+'%';document.
 
 // ===== HELPERS =====
 function dbSave(path,item){ return db.ref(path).push(item); }
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function show(id){document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none';});const el=document.getElementById(id);if(el){el.classList.add('active');el.style.display=id==='screen-app'?'flex':'flex';}}
 function g(id){return document.getElementById(id)?.value?.trim()||'';}
 function clr(...ids){ids.forEach(id=>{if(document.getElementById(id))document.getElementById(id).value='';});}
 function now(){return new Date().toLocaleDateString('fr-DZ');}
 function toast(msg,dur=2800){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',dur);}
 </script>
+
 </body>
 </html>
