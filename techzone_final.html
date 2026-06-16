@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Techzone — مساعد الأسعار</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eee;--text:#1a1a1a;--text2:#6b6b6b;--text3:#aaa;--border:#e0e0da;--blue-bg:#e8f0fe;--blue-text:#1a56a0;--green-bg:#e6f4ea;--green-text:#1a7a3a;--red-bg:#fce8e8;--red-text:#c0392b;--purple-bg:#f3e8ff;--purple-text:#7e22ce;--r:10px;--rs:7px}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;font-size:14px}
+.screen{display:none;min-height:100vh}.screen.active{display:block}
+/* LOGIN */
+#screen-login{display:flex;align-items:center;justify-content:center;padding:2rem;min-height:100vh}
+.login-card{background:var(--bg);border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.1);padding:2rem;max-width:400px;width:100%;text-align:center}
+.login-logo{font-size:40px;margin-bottom:12px}
+.login-card h2{font-size:20px;font-weight:600;margin-bottom:6px}
+.login-card p{font-size:13px;color:var(--text2);margin-bottom:1.5rem}
+.avatar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.avatar-btn{padding:10px 6px;border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:13px;font-family:inherit;background:var(--bg);transition:all .15s}
+.avatar-btn:hover{background:var(--bg2)}
+.avatar-btn.selected{background:var(--text);color:#fff;border-color:var(--text)}
+.divider{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--text3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+input,select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;background:var(--bg);color:var(--text);font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--blue-text)}
+.btn{padding:9px 16px;border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--bg2)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-primary:hover{opacity:.87;background:var(--text)}
+.btn-danger{color:var(--red-text);border-color:transparent;padding:5px 8px}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-purple{background:var(--purple-bg);color:var(--purple-text);border-color:#d8b4fe}
+.btn-purple:hover{background:#ede9ff}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-block{width:100%;justify-content:center}
+.lbl{display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.form-group{margin-bottom:10px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:10px}
+/* APP */
+#screen-app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200}
+.topbar-brand{font-size:15px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-gray{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot-green{background:#22c55e}
+.dot-red{background:#ef4444}
+.user-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--bg2);border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border)}
+.user-pill:hover{background:var(--bg3)}
+.tabs{background:var(--bg);border-bottom:1px solid var(--border);display:flex;padding:0 1.5rem;overflow-x:auto}
+.tab-btn{padding:12px 14px;font-size:13px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--text2);font-family:inherit;white-space:nowrap;transition:all .15s}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.tab-btn:hover:not(.active){color:var(--text);background:var(--bg2)}
+.main{flex:1;padding:1.5rem;max-width:960px;width:100%;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.stat-label{font-size:11px;color:var(--text2);margin-bottom:3px}
+.stat-val{font-size:20px;font-weight:600}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.card-title{font-size:14px;font-weight:600}
+.search-box{position:relative;margin-bottom:1rem}
+.search-box input{padding-right:34px}
+.search-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.group{margin-bottom:1rem}
+.group-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;border-bottom:none}
+.group-wrap{border:1px solid var(--border);border-radius:0 0 var(--r) var(--r);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:500;color:var(--text2);font-size:11px;padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;background:var(--bg2)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.empty{text-align:center;padding:2.5rem;color:var(--text3)}
+.saving{font-size:11px;color:var(--text3);display:none}
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:400px}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:8px}
+.msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.65;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-start;background:var(--blue-bg);border-bottom-left-radius:4px}
+.msg.ai{align-self:flex-end;background:var(--bg);border:1px solid var(--border);border-bottom-right-radius:4px}
+.msg.loading{opacity:.5;font-style:italic}
+.msg.error{background:var(--red-bg);color:var(--red-text)}
+.chat-foot{padding-top:.75rem;border-top:1px solid var(--border)}
+.chat-row{display:flex;gap:8px;margin-bottom:8px}
+.chat-row textarea{flex:1;resize:none}
+.quick-btns{display:flex;flex-wrap:wrap;gap:6px}
+.quick-btn{padding:5px 10px;font-size:12px;border:1px solid var(--border);border-radius:20px;background:var(--bg);cursor:pointer;color:var(--text2);transition:all .15s;font-family:inherit}
+.quick-btn:hover{background:var(--bg2);color:var(--text)}
+/* IMPORT MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--bg);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.15);width:100%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-head{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-head h3{font-size:15px;font-weight:600}
+.modal-body{padding:1.5rem;overflow-y:auto;flex:1}
+.modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.steps{display:flex;gap:4px;margin-bottom:1.5rem}
+.step-pill{flex:1;padding:6px;text-align:center;font-size:12px;border-radius:20px;background:var(--bg2);color:var(--text3)}
+.step-pill.active{background:var(--text);color:#fff;font-weight:500}
+.step-pill.done{background:var(--green-bg);color:var(--green-text)}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--blue-text);background:var(--blue-bg)}
+.progress-bar{height:4px;background:var(--bg2);border-radius:4px;overflow:hidden;margin:1rem 0}
+.progress-fill{height:100%;background:var(--blue-text);border-radius:4px;transition:width .3s}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:1rem}
+.preview-table th{background:var(--bg2);padding:7px 8px;font-size:11px;font-weight:500;color:var(--text2);border:1px solid var(--border);text-align:right}
+.preview-table td{padding:5px 8px;border:1px solid var(--border)}
+.preview-table input,.preview-table select{padding:4px 6px;font-size:12px;border:1px solid var(--border);border-radius:4px;width:100%}
+.info-box{background:#fff8e1;border:1px solid #f0d070;border-radius:var(--rs);padding:10px 12px;font-size:12px;color:#8a6000;line-height:1.6;margin-bottom:12px}
+.success-box{background:var(--green-bg);border:1px solid #86efac;border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--green-text);line-height:1.6;margin-bottom:12px}
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;display:none}
+@media(max-width:600px){.form-grid-2,.form-grid-3{grid-template-columns:1fr}.main{padding:1rem}.topbar{padding:0 1rem}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">📦</div>
+    <h2>Techzone — مساعد الأسعار</h2>
+    <p>اختر اسمك للبدء</p>
+    <div class="avatar-grid" id="avatar-grid"></div>
+    <div class="divider">أو اكتب اسمك</div>
+    <div class="form-group"><input id="custom-name" placeholder="اسمك..." /></div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()" style="margin-top:8px;font-size:14px;padding:11px">دخول ←</button>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:8px">أدخل مفتاح الذكاء الاصطناعي (اختياري)</p>
+      <input id="login-ant-key" type="password" placeholder="sk-ant-... (للمساعد الذكي ورفع الملفات)" style="font-size:12px" />
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="screen-app" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand">📦 Techzone — مساعد الأسعار</div>
+    <div class="topbar-right">
+      <span id="conn-status" class="badge badge-gray"><span id="conn-dot" class="dot dot-red"></span> اتصال...</span>
+      <div class="user-pill" onclick="doLogout()"><span id="topbar-user">—</span> ↩</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('suppliers',this)">📦 الموردون</button>
+    <button class="tab-btn" onclick="switchTab('clients',this)">🤝 الزبائن</button>
+    <button class="tab-btn" onclick="switchTab('ai',this)">🤖 المساعد الذكي</button>
+    <button class="tab-btn" onclick="switchTab('settings',this)">⚙️ الإعدادات</button>
+  </div>
+  <div class="main">
+
+    <!-- SUPPLIERS -->
+    <div id="tab-suppliers" class="tab-panel active">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">الموردون</div><div class="stat-val" id="cnt-s">0</div></div>
+        <div class="stat-card"><div class="stat-label">المنتجات</div><div class="stat-val" id="cnt-p">0</div></div>
+        <div class="stat-card"><div class="stat-label">أقل سعر</div><div class="stat-val" id="min-p">—</div><div class="stat-sub">دج</div></div>
+        <div class="stat-card"><div class="stat-label">أعلى سعر</div><div class="stat-val" id="max-p">—</div><div class="stat-sub">دج</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">✏️ إدخال يدوي</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-purple btn-sm" onclick="openImport('suppliers')">📂 رفع PDF / Excel</button>
+            <span class="saving" id="save-s">⏳</span>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div><span class="lbl">اسم المورد *</span><input id="s-supplier" placeholder="مثال: مورد الجزائر" /></div>
+          <div><span class="lbl">اسم المنتج *</span><input id="s-product" placeholder="مثال: دفتر A4 سلكي" /></div>
+        </div>
+        <div class="form-grid-3">
+          <div><span class="lbl">المرجع / الوصف</span><input id="s-ref" placeholder="مثال: علبة 12، مخطط" /></div>
+          <div><span class="lbl">السعر (دج) *</span><input id="s-price" type="number" min="0" placeholder="0.00" /></div>
+          <div><span class="lbl">الوحدة</span><select id="s-unit"><option>قطعة</option><option>علبة</option><option>رزمة</option><option>كرتون</option><option>دوزين</option><option>كغ</option><option>لتر</option><option>طن</option></select></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addProduct()">➕ إضافة</button></div>
+      </div>
+      <div class="search-box"><span class="search-icon">🔍</span><input id="search-s" style="padding-right:34px" placeholder="بحث..." oninput="renderS()" /></div>
+      <div id="suppliers-list"><div class="empty">⏳ جارٍ التحميل...</div></div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div id="tab-clients" class="tab-panel">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">الزبائن</div><div class="stat-val" id="cnt-cl">0</div></div>
+        <div class="stat-card"><div class="stat-label">عروض الأسعار</div><div class="stat-val" id="cnt-of">0</div></div>
+        <div class="stat-card"><div class="stat-label">آخر إضافة</div><div class="stat-val" style="font-size:12px;padding-top:5px" id="last-of">—</div></div>
+        <div class="stat-card"><div class="stat-label">أعلى عرض</div><div class="stat-val" id="max-of">—</div><div class="stat-sub">دج</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">✏️ إدخال يدوي</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-purple btn-sm" onclick="openImport('clients')">📂 رفع PDF / Excel</button>
+            <span class="saving" id="save-c">⏳</span>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div><span class="lbl">اسم الزبون *</span><input id="c-client" placeholder="مثال: مؤسسة النجمة" /></div>
+          <div><span class="lbl">نوع الزبون</span><select id="c-type"><option>موزع</option><option>إدارة</option><option>شركة</option><option>متجر</option><option>مدرسة</option></select></div>
+        </div>
+        <div class="form-grid-3">
+          <div><span class="lbl">المنتج *</span><input id="c-product" placeholder="مثال: أقلام بيك" /></div>
+          <div><span class="lbl">السعر (دج) *</span><input id="c-price" type="number" min="0" placeholder="0.00" /></div>
+          <div><span class="lbl">الوحدة</span><select id="c-unit"><option>قطعة</option><option>علبة</option><option>رزمة</option><option>كرتون</option><option>دوزين</option></select></div>
+        </div>
+        <div class="form-grid-2">
+          <div><span class="lbl">الكمية</span><input id="c-qty" type="number" min="0" placeholder="50" /></div>
+          <div><span class="lbl">ملاحظة</span><input id="c-note" placeholder="سعر جملة، خاص..." /></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addClient()">➕ إضافة</button></div>
+      </div>
+      <div class="search-box"><span class="search-icon">🔍</span><input id="search-c" style="padding-right:34px" placeholder="بحث..." oninput="renderC()" /></div>
+      <div id="clients-list"><div class="empty">⏳ جارٍ التحميل...</div></div>
+    </div>
+
+    <!-- AI -->
+    <div id="tab-ai" class="tab-panel">
+      <div id="no-key-box" class="info-box" style="display:none">⚠️ أضف مفتاح Anthropic في <strong>الإعدادات</strong> لتفعيل المساعد الذكي.</div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="msg ai">مرحباً! أنا مساعد Techzone للأسعار 📦
+أطلع على جميع بياناتكم وأجيب بدقة على أسئلتكم حول الأسعار، الموردين، الزبائن، وهوامش الربح.</div>
+        </div>
+        <div class="chat-foot">
+          <div class="chat-row">
+            <textarea id="chat-input" rows="2" placeholder="اكتب سؤالك... (Ctrl+Enter للإرسال)" onkeydown="chatKey(event)"></textarea>
+            <button class="btn btn-primary" onclick="sendAI()" style="align-self:flex-end">إرسال ↗</button>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="quickQ('اعرض جميع أسعار الموردين')">كل أسعار الموردين</button>
+            <button class="quick-btn" onclick="quickQ('قارن الموردين وأخبرني الأرخص لكل منتج')">مقارنة الموردين</button>
+            <button class="quick-btn" onclick="quickQ('احسب هامش الربح لكل منتج')">هوامش الربح</button>
+            <button class="quick-btn" onclick="quickQ('ما آخر الأسعار المعروضة على الزبائن؟')">آخر العروض</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab-panel">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem">🔑 مفتاح الذكاء الاصطناعي</div>
+        <div class="form-group"><span class="lbl">Anthropic API Key</span><input id="set-key" type="password" placeholder="sk-ant-..." /></div>
+        <button class="btn btn-primary btn-sm" onclick="saveKey()">💾 حفظ المفتاح</button>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem">📤 تصدير البيانات</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" onclick="exportCSV('suppliers')">📊 تصدير الموردين CSV</button>
+          <button class="btn" onclick="exportCSV('clients')">🤝 تصدير الزبائن CSV</button>
+          <button class="btn" onclick="window.print()">🖨️ طباعة</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem">ℹ️ معلومات</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.9">
+          <strong>Techzone — مساعد الأسعار</strong><br>
+          بيانات مشتركة بين جميع الموظفين عبر Firebase<br>
+          يدعم: إدخال يدوي + رفع PDF وExcel<br>
+          رابط التطبيق: <span id="app-url" style="color:var(--blue-text)"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div id="import-modal" style="display:none">
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modal-title">📂 استيراد من ملف</h3>
+        <button class="btn btn-sm" onclick="closeImport()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="steps">
+          <div class="step-pill active" id="sp1">1 · رفع الملف</div>
+          <div class="step-pill" id="sp2">2 · تحليل ذكي</div>
+          <div class="step-pill" id="sp3">3 · مراجعة</div>
+        </div>
+        <div id="istep1">
+          <div class="upload-zone" id="uz" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="onDrop(event)" onclick="document.getElementById('fi').click()">
+            <input type="file" id="fi" accept=".pdf,.xlsx,.xls,.csv" onchange="onFile(event)" style="display:none">
+            <div style="font-size:36px;margin-bottom:10px">📄</div>
+            <p style="font-size:14px;margin-bottom:6px">اسحب الملف هنا أو اضغط للاختيار</p>
+            <small style="color:var(--text3)">PDF · Excel (.xlsx/.xls) · CSV</small>
+          </div>
+          <div class="info-box" style="margin-top:1rem;margin-bottom:0">💡 الذكاء الاصطناعي يقرأ الملف ويستخرج الأسعار تلقائياً بأي تنسيق.</div>
+        </div>
+        <div id="istep2" style="display:none;text-align:center;padding:2rem">
+          <div style="font-size:40px;margin-bottom:1rem">🤖</div>
+          <div style="font-size:15px;font-weight:500;margin-bottom:6px" id="proc-t">جارٍ قراءة الملف...</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem" id="proc-s">يُرجى الانتظار</div>
+          <div class="progress-bar"><div class="progress-fill" id="prog" style="width:5%"></div></div>
+        </div>
+        <div id="istep3" style="display:none">
+          <div class="success-box" id="import-info"></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px" id="row-cnt"></div>
+          <div style="overflow-x:auto"><table class="preview-table"><thead id="pt-head"></thead><tbody id="pt-body"></tbody></table></div>
+          <div class="info-box" style="margin-bottom:0">✏️ عدّل أي خلية قبل الاستيراد. اضغط 🗑 لحذف صف.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeImport()">إلغاء</button>
+        <button class="btn btn-primary" id="confirm-btn" onclick="confirmImport()" style="display:none">✅ استيراد</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== CONFIG — Firebase مدمج مباشرة =====
+const FB_CONFIG = {
+  apiKey: "AIzaSyDWWosWPgSDuS7Xf9a6JEHp2lY5q6RtlSw",
+  projectId: "techzone-devis",
+  databaseURL: "https://techzone-devis-default-rtdb.firebaseio.com"
+};
+
+// ===== STATE =====
+let db, suppliers={}, clientPrices={}, chatHistory=[];
+let currentUser='', importTarget='suppliers', importRows=[];
+const TEAM=['زكي','محمد','هيات','منال','توفيق','نوري','عبد الغاني','صابر','إسحاق','عثمان'];
+
+// ===== INIT FIREBASE =====
+window.onload = function(){
+  document.getElementById('app-url').textContent = location.href;
+  // Build avatar grid
+  document.getElementById('avatar-grid').innerHTML = TEAM.map(n=>
+    `<button class="avatar-btn" onclick="pick('${n}',this)">${n}</button>`).join('');
+  // Load saved user
+  const u = localStorage.getItem('tz_user');
+  if(u) document.getElementById('custom-name').value = u;
+  // Load saved key
+  const k = localStorage.getItem('tz_key');
+  if(k){ document.getElementById('login-ant-key').value=k; document.getElementById('set-key').value=k; }
+  // Init Firebase
+  try{
+    firebase.initializeApp(FB_CONFIG);
+    db = firebase.database();
+    db.ref('.info/connected').on('value', s=>{
+      const on=s.val();
+      document.getElementById('conn-dot').className='dot '+(on?'dot-green':'dot-red');
+      document.getElementById('conn-status').innerHTML='<span class="dot '+(on?'dot-green':'dot-red')+'"></span> '+(on?'متصل':'غير متصل');
+      document.getElementById('conn-status').className='badge '+(on?'badge-green':'badge-gray');
+    });
+    db.ref('suppliers').on('value', s=>{ suppliers=s.val()||{}; renderS(); updateSStats(); });
+    db.ref('clients').on('value', s=>{ clientPrices=s.val()||{}; renderC(); updateCStats(); });
+  }catch(e){ toast('خطأ Firebase: '+e.message,4000); }
+};
+
+// ===== LOGIN =====
+function pick(n,btn){ document.querySelectorAll('.avatar-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); document.getElementById('custom-name').value=n; }
+function doLogin(){
+  const n=document.getElementById('custom-name').value.trim();
+  if(!n){toast('اكتب اسمك');return;}
+  currentUser=n; localStorage.setItem('tz_user',n);
+  const k=document.getElementById('login-ant-key').value.trim();
+  if(k){ localStorage.setItem('tz_key',k); document.getElementById('set-key').value=k; }
+  document.getElementById('topbar-user').textContent='👤 '+n;
+  checkKey();
+  show('screen-app');
+}
+function doLogout(){ if(confirm('تغيير المستخدم؟')) show('screen-login'); }
+
+// ===== TABS =====
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active'); btn.classList.add('active');
+}
+
+// ===== SUPPLIERS =====
+function addProduct(){
+  const supplier=g('s-supplier'),product=g('s-product'),ref=g('s-ref');
+  const price=parseFloat(document.getElementById('s-price').value),unit=g('s-unit');
+  if(!supplier||!product){toast('أدخل اسم المورد والمنتج');return;}
+  if(!price||price<=0){toast('أدخل سعراً صحيحاً');return;}
+  dbSave('suppliers',{supplier,product,ref,price,unit,by:currentUser,date:now()});
+  clr('s-supplier','s-product','s-ref','s-price'); toast('✅ تمت الإضافة');
+}
+function delProduct(id){ if(confirm('حذف؟')) db.ref('suppliers/'+id).remove(); }
+function updateSStats(){
+  const l=Object.values(suppliers);
+  document.getElementById('cnt-s').textContent=[...new Set(l.map(s=>s.supplier))].length;
+  document.getElementById('cnt-p').textContent=l.length;
+  if(l.length){
+    document.getElementById('min-p').textContent=Math.min(...l.map(s=>+s.price)).toLocaleString('fr-DZ');
+    document.getElementById('max-p').textContent=Math.max(...l.map(s=>+s.price)).toLocaleString('fr-DZ');
+  }
+}
+function renderS(){
+  const q=(document.getElementById('search-s')?.value||'').toLowerCase();
+  const all=Object.entries(suppliers).filter(([,s])=>s.product?.toLowerCase().includes(q)||s.supplier?.toLowerCase().includes(q)||(s.ref||'').toLowerCase().includes(q));
+  const el=document.getElementById('suppliers-list');
+  if(!all.length){el.innerHTML=`<div class="empty">${q?'🔍 لا توجد نتائج':'📭 لم تُضف أي منتجات بعد'}</div>`;return;}
+  const g2={};all.forEach(([id,s])=>{if(!g2[s.supplier])g2[s.supplier]=[];g2[s.supplier].push({id,...s});});
+  el.innerHTML=Object.entries(g2).map(([sup,items])=>`
+    <div class="group">
+      <div class="group-bar"><span style="font-weight:600">🏭 ${sup}</span><span class="badge badge-blue">${items.length} منتج</span></div>
+      <div class="group-wrap"><table>
+        <thead><tr><th>المنتج</th><th>المرجع</th><th>السعر</th><th>الوحدة</th><th>بواسطة</th><th></th></tr></thead>
+        <tbody>${items.map(p=>`<tr>
+          <td style="font-weight:500">${p.product}</td>
+          <td style="color:var(--text2);font-size:12px">${p.ref||'—'}</td>
+          <td style="font-weight:600">${(+p.price).toLocaleString('fr-DZ')} دج</td>
+          <td><span class="tag" style="background:var(--blue-bg);color:var(--blue-text)">${p.unit}</span></td>
+          <td style="font-size:11px;color:var(--text3)">${p.by||''}</td>
+          <td><button class="btn btn-danger" onclick="delProduct('${p.id}')">🗑</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`).join('');
+}
+
+// ===== CLIENTS =====
+function addClient(){
+  const client=g('c-client'),type=g('c-type'),product=g('c-product');
+  const price=parseFloat(document.getElementById('c-price').value),unit=g('c-unit');
+  const qty=g('c-qty'),note=g('c-note');
+  if(!client||!product){toast('أدخل اسم الزبون والمنتج');return;}
+  if(!price||price<=0){toast('أدخل سعراً صحيحاً');return;}
+  dbSave('clients',{client,type,product,price,unit,qty,note,by:currentUser,date:now()});
+  clr('c-client','c-product','c-price','c-qty','c-note'); toast('✅ تمت الإضافة');
+}
+function delClient(id){ if(confirm('حذف؟')) db.ref('clients/'+id).remove(); }
+function updateCStats(){
+  const l=Object.values(clientPrices);
+  document.getElementById('cnt-cl').textContent=[...new Set(l.map(c=>c.client))].length;
+  document.getElementById('cnt-of').textContent=l.length;
+  if(l.length){
+    const last=l[l.length-1];
+    document.getElementById('last-of').textContent=(last.by||'')+' · '+(last.date||'');
+    document.getElementById('max-of').textContent=Math.max(...l.map(c=>+c.price)).toLocaleString('fr-DZ');
+  }
+}
+function renderC(){
+  const q=(document.getElementById('search-c')?.value||'').toLowerCase();
+  const all=Object.entries(clientPrices).filter(([,c])=>c.client?.toLowerCase().includes(q)||c.product?.toLowerCase().includes(q));
+  const el=document.getElementById('clients-list');
+  if(!all.length){el.innerHTML=`<div class="empty">${q?'🔍 لا توجد نتائج':'📭 لم تُضف أي عروض بعد'}</div>`;return;}
+  const g2={};all.forEach(([id,c])=>{if(!g2[c.client])g2[c.client]=[];g2[c.client].push({id,...c});});
+  el.innerHTML=Object.entries(g2).map(([cl,items])=>`
+    <div class="group">
+      <div class="group-bar"><span style="font-weight:600">🤝 ${cl}</span><span class="badge badge-green">${items[0].type} · ${items.length} عرض</span></div>
+      <div class="group-wrap"><table>
+        <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الوحدة</th><th>ملاحظة</th><th>بواسطة</th><th></th></tr></thead>
+        <tbody>${items.map(o=>`<tr>
+          <td style="font-weight:500">${o.product}</td>
+          <td style="color:var(--text2)">${o.qty||'—'}</td>
+          <td style="font-weight:600">${(+o.price).toLocaleString('fr-DZ')} دج</td>
+          <td><span class="tag" style="background:var(--green-bg);color:var(--green-text)">${o.unit}</span></td>
+          <td style="font-size:11px;color:var(--text2)">${o.note||'—'}</td>
+          <td style="font-size:11px;color:var(--text3)">${o.by||''}</td>
+          <td><button class="btn btn-danger" onclick="delClient('${o.id}')">🗑</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`).join('');
+}
+
+// ===== AI =====
+function checkKey(){ document.getElementById('no-key-box').style.display=localStorage.getItem('tz_key')?'none':'block'; }
+function buildCtx(){
+  const sl=Object.values(suppliers),cl=Object.values(clientPrices);
+  let ctx=`أنت مساعد أسعار احترافي لشركة Techzone للقرطاسية بالجملة في الجزائر. مديرها زكي. أجب بالعربية بدقة.\n\n`;
+  if(sl.length){
+    ctx+=`== الموردون ==\n`;
+    const byS={};sl.forEach(s=>{if(!byS[s.supplier])byS[s.supplier]=[];byS[s.supplier].push(s);});
+    Object.entries(byS).forEach(([s,i])=>{ctx+=`${s}:\n`;i.forEach(p=>ctx+=`  - ${p.product}${p.ref?' ('+p.ref+')':''}: ${p.price} دج/${p.unit}\n`);});
+  }
+  if(cl.length){
+    ctx+=`\n== الزبائن ==\n`;
+    const byC={};cl.forEach(c=>{if(!byC[c.client])byC[c.client]=[];byC[c.client].push(c);});
+    Object.entries(byC).forEach(([c,i])=>{ctx+=`${c} (${i[0].type}):\n`;i.forEach(o=>ctx+=`  - ${o.product}: ${o.price} دج/${o.unit}${o.qty?' · '+o.qty:''}\n`);});
+  }
+  return ctx;
+}
+async function sendAI(){
+  const inp=document.getElementById('chat-input'),text=inp.value.trim();
+  if(!text)return;
+  const key=localStorage.getItem('tz_key');
+  if(!key){toast('أضف مفتاح Anthropic في الإعدادات');return;}
+  inp.value='';
+  addMsg(text,'user'); chatHistory.push({role:'user',content:text});
+  const load=addMsg('جارٍ التفكير...','ai loading');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:buildCtx(),messages:chatHistory.slice(-12)})
+    });
+    const d=await r.json();
+    const reply=d.content?.map(b=>b.text||'').join('')||'لم أتمكن من الإجابة.';
+    load.className='msg ai'; load.textContent=reply;
+    chatHistory.push({role:'assistant',content:reply});
+  }catch(e){load.className='msg error';load.textContent='خطأ: '+e.message;}
+  scrollChat();
+}
+function quickQ(q){document.getElementById('chat-input').value=q;sendAI();}
+function chatKey(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();sendAI();}}
+function addMsg(t,cls){const el=document.getElementById('chat-msgs');const d=document.createElement('div');d.className='msg '+cls;d.textContent=t;el.appendChild(d);scrollChat();return d;}
+function scrollChat(){const el=document.getElementById('chat-msgs');if(el)el.scrollTop=el.scrollHeight;}
+
+// ===== SETTINGS =====
+function saveKey(){const k=document.getElementById('set-key').value.trim();localStorage.setItem('tz_key',k);checkKey();toast('✅ تم حفظ المفتاح');}
+function exportCSV(type){
+  const l=type==='suppliers'?Object.values(suppliers):Object.values(clientPrices);
+  if(!l.length){toast('لا توجد بيانات');return;}
+  let csv=type==='suppliers'?'المورد,المنتج,المرجع,السعر,الوحدة,بواسطة,التاريخ\n':'الزبون,النوع,المنتج,السعر,الوحدة,الكمية,ملاحظة,بواسطة,التاريخ\n';
+  if(type==='suppliers') l.forEach(s=>csv+=`"${s.supplier}","${s.product}","${s.ref||''}","${s.price}","${s.unit}","${s.by||''}","${s.date||''}"\n`);
+  else l.forEach(c=>csv+=`"${c.client}","${c.type}","${c.product}","${c.price}","${c.unit}","${c.qty||''}","${c.note||''}","${c.by||''}","${c.date||''}"\n`);
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`techzone_${type}_${now()}.csv`;a.click();toast('✅ تم التصدير');
+}
+
+// ===== IMPORT =====
+function openImport(target){
+  importTarget=target; importRows=[];
+  document.getElementById('modal-title').textContent=target==='suppliers'?'📂 استيراد أسعار الموردين':'📂 استيراد أسعار الزبائن';
+  goStep(1); document.getElementById('fi').value='';
+  document.getElementById('import-modal').style.display='flex';
+}
+function closeImport(){document.getElementById('import-modal').style.display='none';}
+function onDrop(e){e.preventDefault();document.getElementById('uz').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)processFile(f);}
+function onFile(e){const f=e.target.files[0];if(f)processFile(f);}
+async function processFile(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  goStep(2); setP(10,'جارٍ قراءة الملف...','');
+  let raw='';
+  try{
+    if(ext==='pdf'){
+      raw=await readPDF(file); setP(50,'تم استخراج النص...','جارٍ التحليل بالذكاء الاصطناعي');
+    }else if(['xlsx','xls'].includes(ext)){
+      raw=await readExcel(file); setP(50,'تم قراءة Excel...','جارٍ التحليل');
+    }else if(ext==='csv'){
+      raw=await file.text(); setP(50,'تم قراءة CSV...','جارٍ التحليل');
+    }else{toast('صيغة غير مدعومة');goStep(1);return;}
+    setP(70,'جارٍ التحليل بالذكاء الاصطناعي...','بضع ثوان...');
+    const rows=await aiParse(raw,importTarget);
+    setP(100,'اكتمل ✅','');
+    setTimeout(()=>showPreview(rows),400);
+  }catch(err){goStep(1);toast('خطأ: '+err.message);}
+}
+async function readPDF(file){
+  const ab=await file.arrayBuffer();
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let t='';
+  for(let i=1;i<=Math.min(pdf.numPages,15);i++){const p=await pdf.getPage(i);const c=await p.getTextContent();t+=c.items.map(x=>x.str).join(' ')+'\n';}
+  return t;
+}
+async function readExcel(file){
+  const ab=await file.arrayBuffer();const wb=XLSX.read(ab,{type:'array'});
+  let t='';wb.SheetNames.forEach(n=>{t+=`[ورقة: ${n}]\n${XLSX.utils.sheet_to_csv(wb.Sheets[n])}\n\n`;});return t;
+}
+async function aiParse(raw,target){
+  const key=localStorage.getItem('tz_key');
+  if(!key) throw new Error('مفتاح Anthropic غير موجود. أضفه في الإعدادات أولاً.');
+  const isS=target==='suppliers';
+  const prompt=isS
+    ?`استخرج جميع المنتجات وأسعارها من النص. أعد JSON array فقط بدون أي نص آخر:\n[{"supplier":"المورد","product":"المنتج","ref":"المرجع","price":0,"unit":"قطعة"}]\nالنص:\n${raw.substring(0,8000)}`
+    :`استخرج بيانات أسعار الزبائن. أعد JSON array فقط:\n[{"client":"الزبون","type":"موزع","product":"المنتج","price":0,"unit":"قطعة","qty":"","note":""}]\nالنص:\n${raw.substring(0,8000)}`;
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+  });
+  const d=await r.json();
+  const txt=d.content?.map(b=>b.text||'').join('');
+  const m=txt.match(/\[[\s\S]*\]/);
+  if(!m) throw new Error('لم يتم استخراج بيانات. تأكد أن الملف يحتوي على أسعار.');
+  return JSON.parse(m[0]);
+}
+function showPreview(rows){
+  importRows=rows.filter(r=>r&&(r.product||r.client));
+  if(!importRows.length){toast('لم يُستخرج أي بيانات');goStep(1);return;}
+  goStep(3);
+  document.getElementById('import-info').textContent=`✅ تم استخراج ${importRows.length} صف. راجعها وعدّل إذا لزم.`;
+  document.getElementById('row-cnt').textContent=`الإجمالي: ${importRows.length} صف`;
+  const isS=importTarget==='suppliers';
+  if(isS){
+    document.getElementById('pt-head').innerHTML='<tr><th>المورد</th><th>المنتج</th><th>المرجع</th><th>السعر</th><th>الوحدة</th><th>🗑</th></tr>';
+    document.getElementById('pt-body').innerHTML=importRows.map((r,i)=>`<tr id="pr-${i}">
+      <td><input value="${r.supplier||''}" onchange="importRows[${i}].supplier=this.value"/></td>
+      <td><input value="${r.product||''}" onchange="importRows[${i}].product=this.value"/></td>
+      <td><input value="${r.ref||''}" onchange="importRows[${i}].ref=this.value"/></td>
+      <td><input type="number" value="${r.price||''}" onchange="importRows[${i}].price=+this.value" style="width:80px"/></td>
+      <td><select onchange="importRows[${i}].unit=this.value">${['قطعة','علبة','رزمة','كرتون','دوزين','كغ','لتر'].map(u=>`<option${u===r.unit?' selected':''}>${u}</option>`).join('')}</select></td>
+      <td><button class="btn btn-danger" onclick="rmRow(${i})">🗑</button></td></tr>`).join('');
+  }else{
+    document.getElementById('pt-head').innerHTML='<tr><th>الزبون</th><th>النوع</th><th>المنتج</th><th>السعر</th><th>الوحدة</th><th>الكمية</th><th>ملاحظة</th><th>🗑</th></tr>';
+    document.getElementById('pt-body').innerHTML=importRows.map((r,i)=>`<tr id="pr-${i}">
+      <td><input value="${r.client||''}" onchange="importRows[${i}].client=this.value"/></td>
+      <td><select onchange="importRows[${i}].type=this.value">${['موزع','إدارة','شركة','متجر'].map(t=>`<option${t===r.type?' selected':''}>${t}</option>`).join('')}</select></td>
+      <td><input value="${r.product||''}" onchange="importRows[${i}].product=this.value"/></td>
+      <td><input type="number" value="${r.price||''}" onchange="importRows[${i}].price=+this.value" style="width:80px"/></td>
+      <td><select onchange="importRows[${i}].unit=this.value">${['قطعة','علبة','رزمة','كرتون','دوزين'].map(u=>`<option${u===r.unit?' selected':''}>${u}</option>`).join('')}</select></td>
+      <td><input value="${r.qty||''}" onchange="importRows[${i}].qty=this.value" style="width:60px"/></td>
+      <td><input value="${r.note||''}" onchange="importRows[${i}].note=this.value"/></td>
+      <td><button class="btn btn-danger" onclick="rmRow(${i})">🗑</button></td></tr>`).join('');
+  }
+  document.getElementById('confirm-btn').style.display='inline-flex';
+}
+function rmRow(i){document.getElementById('pr-'+i)?.remove();importRows[i]=null;}
+async function confirmImport(){
+  const rows=importRows.filter(r=>r);if(!rows.length){toast('لا توجد صفوف');return;}
+  document.getElementById('confirm-btn').textContent='⏳ جارٍ الاستيراد...';
+  document.getElementById('confirm-btn').disabled=true;
+  let count=0;
+  for(const r of rows){
+    if(importTarget==='suppliers'&&r.product){ await dbSave('suppliers',{supplier:r.supplier||'غير محدد',product:r.product,ref:r.ref||'',price:+r.price||0,unit:r.unit||'قطعة',by:currentUser+' (استيراد)',date:now()}); count++; }
+    else if(importTarget==='clients'&&r.client&&r.product){ await dbSave('clients',{client:r.client,type:r.type||'موزع',product:r.product,price:+r.price||0,unit:r.unit||'قطعة',qty:r.qty||'',note:r.note||'',by:currentUser+' (استيراد)',date:now()}); count++; }
+  }
+  closeImport(); toast(`✅ تم استيراد ${count} عنصر`);
+}
+function goStep(n){
+  [1,2,3].forEach(i=>{document.getElementById('istep'+i).style.display=i===n?'block':'none';document.getElementById('sp'+i).className='step-pill'+(i<n?' done':i===n?' active':'');});
+  document.getElementById('confirm-btn').style.display=n===3?'inline-flex':'none';
+  if(n===3){document.getElementById('confirm-btn').textContent='✅ استيراد';document.getElementById('confirm-btn').disabled=false;}
+}
+function setP(p,t,s){document.getElementById('prog').style.width=p+'%';document.getElementById('proc-t').textContent=t;document.getElementById('proc-s').textContent=s;}
+
+// ===== HELPERS =====
+function dbSave(path,item){ return db.ref(path).push(item); }
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function g(id){return document.getElementById(id)?.value?.trim()||'';}
+function clr(...ids){ids.forEach(id=>{if(document.getElementById(id))document.getElementById(id).value='';});}
+function now(){return new Date().toLocaleDateString('fr-DZ');}
+function toast(msg,dur=2800){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',dur);}
+</script>
+</body>
+</html>
